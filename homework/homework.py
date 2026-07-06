@@ -59,7 +59,7 @@ def clean_campaign_data():
                 Dataframe = pd.read_csv(archivo)
                 DataFrame= pd.concat([DataFrame,Dataframe],ignore_index=True)
     
-    client=DataFrame[["client_id","age","job","marital","education","credit_default","mortgage"]]
+    client=DataFrame[['client_id','age','job','marital','education','credit_default','mortgage']]
     
     client["job"]=client["job"].str.translate(str.maketrans({".":"","-":"_"}))
     client["education"]=client["education"].str.replace(".","_").replace("unknown",pd.NA)
