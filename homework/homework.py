@@ -3,7 +3,8 @@ Escriba el codigo que ejecute la accion solicitada.
 """
 
 # pylint: disable=import-outside-toplevel
-
+import zipfile, glob
+import pandas as pd
 
 def clean_campaign_data():
     """
@@ -49,8 +50,47 @@ def clean_campaign_data():
 
 
     """
-
-    return
+    DataFrame=pd.DataFrame()
+    lista = glob.glob("files\input\*")
+    for zip in lista:
+        with zipfile.ZipFile(zip, "r") as zip_file:
+            archivo = zip_file.namelist()[0]
+            with zip_file.open(archivo, "r") as archivo:
+                Dataframe = pd.read_csv(archivo)
+                DataFrame= pd.concat([DataFrame,Dataframe],ignore_index=True)
+    
+    client=DataFrame[["client_id","age","job","marital","education","credit_default","mortgage"]]
+    
+    client["job"]=client["job"].str.translate(str.maketrans({".":"","-":"_"}))
+    client["education"]=client["education"].str.replace(".","_").replace("unknown",pd.NA)
+    client["credit_default"]=client["credit_default"].apply(lambda x: 1 if x=="yes" else 0 )
+    client["mortgage"]=client["mortgage"].apply(lambda x: 1 if x=="yes" else 0 )
+    
+    campaign=DataFrame[["client_id","number_contacts","contact_duration","previous_campaign_contacts"
+                        ,"previous_outcome","campaign_outcome"]]
+    
+    campaign["previous_outcome"]=campaign["previous_outcome"].apply(lambda x: 1 if x=="success" else 0 )
+    campaign["campaign_outcome"]=campaign["campaign_outcome"].apply(lambda x: 1 if x=="yes" else 0 )
+    meses = {
+    "jan": "01",
+    "feb": "02",
+    "mar": "03",
+    "apr": "04",
+    "may": "05",
+    "jun": "06",
+    "jul": "07",
+    "aug": "08",
+    "sep": "09",
+    "oct": "10",
+    "nov": "11",
+    "dec": "12",}
+    campaign["last_contact_date"]="2022-"+DataFrame["month"].replace(meses)+"-"+DataFrame["day"].apply(lambda x: str(x) if x>=10 else "0"+str(x))
+    economics=DataFrame[["client_id","cons_price_idx","euribor_three_months"]]
+    
+    client.to_csv("files/output/client.csv", index=False)
+    campaign.to_csv("files/output/campaign.csv", index=False)
+    economics.to_csv("files/output/economics.csv", index=False)
+    return 
 
 
 if __name__ == "__main__":
