@@ -51,7 +51,7 @@ def clean_campaign_data():
 
     """
     DataFrame=pd.DataFrame()
-    lista = glob.glob("files\input\*")
+    lista = glob.glob("files/input/*")
     for zip in lista:
         with zipfile.ZipFile(zip, "r") as zip_file:
             archivo = zip_file.namelist()[0]
